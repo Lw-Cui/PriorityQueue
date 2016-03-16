@@ -45,6 +45,12 @@ namespace queue {
 			down(1);
 			return data;
 		}
+		inline int size() const {
+			return array.size() - 1;
+		}
+		inline bool empty() {
+			return array.size() <= 1;
+		}
 	private:
 		void up(size_t index) {
 			T data(array[index]);
@@ -52,6 +58,8 @@ namespace queue {
 			while(index != 1) {
 				if (data < array[index / 2])
 					array[index] = array[index / 2];
+				else
+					break;
 				index /= 2;
 			}
 			array[index] = data;
