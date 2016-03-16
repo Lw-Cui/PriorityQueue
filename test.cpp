@@ -1,29 +1,43 @@
 #include "Queue.h"
 #include "gtest/gtest.h"
+#include <array>
 #include <iostream>
 #include <set>
 #include <thread>
 using namespace std;
 using namespace queue;
 const int MAX = 100000;
+
+template<typename T>
+void insert(PriorityQueue<T>& p, const vector<T> set) {
+	for (const auto &d: set)
+		p.insert(d);
+}
+
 TEST(BasicTest, InsertTest) {
-	PriorityQueue<int> queue;
+	vector<int> dataset;
 	for (int i = MAX; i > 0; i--)
-		queue.insert(i);
-	set<int> container;
-	for (auto p: queue)
-		container.insert(p);
-	int cnt = 1;
-	for (auto value: container)
-		ASSERT_EQ(value, cnt++);
+		dataset.push_back(i);
+	PriorityQueue<int> queue;
+	insert(queue, dataset);
+
+	vector<int> res;
+	for (const auto &d: queue) res.push_back(d);
+	sort(res.begin(), res.end(), [](auto a, auto b) {return a > b;});
+	ASSERT_EQ(res, dataset);
 }
 
 TEST(BasicTest, delMinTest) {
-	PriorityQueue<int> queue;
+	vector<int> dataset;
 	for (int i = MAX; i > 0; i--)
-		queue.insert(i);
-	for (int i = 1; i <= MAX; i++)
-		ASSERT_EQ(queue.delMin(), i);
+		dataset.push_back(i);
+	PriorityQueue<int> queue;
+	insert(queue, dataset);
+
+	vector<int> res;
+	while (!queue.empty()) res.push_back(queue.delMin());
+	sort(res.begin(), res.end(), [](auto a, auto b) {return a > b;});
+	ASSERT_EQ(res, dataset);
 }
 
 class thread_guard {
@@ -36,15 +50,23 @@ private:
 	std::thread& mythread;
 };
 
-void delMin(PriorityQueue<int>& p) {
-	for (int i = MAX; i > 0; i--)
-		p.insert(i);
-}
-
 TEST(ThreadTest, InsertTest) {
-	PriorityQueue<int> p;
-	thread t1(delMin, ref(p));
-	thread t2(delMin, ref(p));
-	thread_guard guard1(t1);
-	thread_guard guard2(t2);
+	vector<int> dataset;
+	for (int i = MAX; i > 0; i--)
+		dataset.push_back(i);
+	PriorityQueue<int> queue;
+	thread t1(insert<int>, ref(queue), dataset);
+	thread t2(insert<int>, ref(queue), dataset);
+	t1.join();
+	t2.join();
+	//thread_guard guard1(t1);
+	//thread_guard guard2(t2);
+
+	vector<int> res;
+	for (const auto &d: queue) res.push_back(d);
+	sort(res.begin(), res.end(), [](auto a, auto b) {return a > b;});
+	for (int i = 0; i < dataset.size(); i++) {
+		ASSERT_EQ(dataset[i], res[i * 2]) << "i = " << i << endl;
+		ASSERT_EQ(dataset[i], res[i * 2 + 1]);
+	}
 }
