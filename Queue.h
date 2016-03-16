@@ -33,10 +33,12 @@ namespace queue {
 		inline const_iterator begin() const {return ++array.begin();}
 		inline const_iterator end() const {return array.end();}
 		inline void insert(const T& data) {
+			std::lock_guard<std::mutex> guard(protector);
 			array.push_back(data);
 			up(array.size() - 1);
 		}
 		inline T delMin() {
+			std::lock_guard<std::mutex> guard(protector);
 			T data = array[1];
 			array[1] = array.back();
 			array.pop_back();
@@ -72,6 +74,7 @@ namespace queue {
 				array[index] = data;
 		}
 		std::vector<MobileAtomic<T>> array;
+		std::mutex protector;
 	};
 }
 

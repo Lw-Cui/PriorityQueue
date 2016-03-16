@@ -26,5 +26,25 @@ TEST(BasicTest, delMinTest) {
 		ASSERT_EQ(queue.delMin(), i);
 }
 
+class thread_guard {
+public:
+	explicit thread_guard(thread& t):mythread(t){}
+	~thread_guard() {if (mythread.joinable()) mythread.join();}
+	thread_guard(const thread_guard &)=delete;
+	thread_guard& operator=(const thread &)=delete;
+private:
+	std::thread& mythread;
+};
+
+void delMin(PriorityQueue<int>& p) {
+	for (int i = MAX; i > 0; i--)
+		p.insert(i);
+}
+
 TEST(ThreadTest, InsertTest) {
+	PriorityQueue<int> p;
+	thread t1(delMin, ref(p));
+	thread t2(delMin, ref(p));
+	thread_guard guard1(t1);
+	thread_guard guard2(t2);
 }
