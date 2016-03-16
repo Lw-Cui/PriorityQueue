@@ -1,14 +1,26 @@
 CC 			= icc
-CXXFLAG 	= -O0 -Wall -Wextra -g -std=c++14 -pthread -I. -openmp
+CXXFLAG 	= -O0 -Wall -Wextra -g -std=c++14 -pthread -I.
 
-Queue		: Queue.o
-	$(CC) $< -o $@ $(CXXFLAG)
+GTEST_HEADER= gtest/*.h gtest/internal/*.h
+GTEST_SRC 	= gsrc/*.cc gsrc/*.h $(GTEST_HEADER)
+
+test 		: test.o gtest_main.a
+	$(CC) $^ -o $@ $(CXXFLAG)
+
+test.o 		: test.cpp Queue.h
+	$(CC) $< -c $(CXXFLAG)
 	
-Queue.o 	: Queue.cpp
-	$(CC) $< -o $@ $(CXXFLAG) -c
+gtest_main.a: gtest-all.o gtest_main.o
+	$(AR) $(ARFLAGS) $@ $^
+
+gtest-all.o : $(GTEST_SRC)
+	$(CC) $(CXXFLAG) -c gsrc/gtest-all.cc
+
+gtest_main.o: $(GTEST_SRC)
+	$(CC) $(CXXFLAG) -c gsrc/gtest_main.cc
 
 clean		:
-	rm -f test.o Queue.o
+	rm -f *.o test
 
 rebuild		:	clean test
 
