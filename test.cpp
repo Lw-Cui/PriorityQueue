@@ -35,7 +35,7 @@ TEST(BasicTest, delMinTest) {
 	insert(queue, dataset);
 
 	vector<int> res;
-	while (!queue.empty()) res.push_back(queue.delMin());
+	while (!queue.empty()) { res.push_back(queue.top()); queue.pop(); }
 	sort(res.begin(), res.end(), [](auto a, auto b) {return a > b;});
 	ASSERT_EQ(res, dataset);
 }

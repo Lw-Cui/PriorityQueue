@@ -1,6 +1,7 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
 #include <atomic>
+#include <functional>
 #include <mutex>
 #include <algorithm>
 #include <vector>
@@ -9,7 +10,7 @@ namespace queue {
 	template<typename T>
 	class MobileAtomic
 	{
-		template<typename T> friend class PriorityQueue;
+		//template<typename T, std::vector<MobileAtomic<T>>> friend class PriorityQueue;
 	public:
 		MobileAtomic(){}
 		MobileAtomic(const T& data): atom(data) {}
@@ -25,11 +26,13 @@ namespace queue {
 		std::atomic<T> atom;
 	};
 
-	template<typename T>
+	template<typename T, 
+		typename Con = std::vector<MobileAtomic<T>>,
+		typename Cmp = std::less<typename Con::value_type>>
 	class PriorityQueue {
 	public:
-		typedef typename std::vector<MobileAtomic<T>>::const_iterator const_iterator;
-		PriorityQueue():array(1) {}
+		typedef typename Con::const_iterator const_iterator;
+		PriorityQueue(const Cmp& c = Cmp()):array(1), compare(c) {}
 		inline const_iterator begin() const {return ++array.begin();}
 		inline const_iterator end() const {return array.end();}
 		inline void insert(const T& data) {
@@ -37,13 +40,20 @@ namespace queue {
 			array.push_back(data);
 			up(array.size() - 1);
 		}
-		inline T delMin() {
+		inline T top() {
+			return array[1];
+		}
+
+		inline int size() {
+			return array.size() - 1;
+		}
+
+		inline void pop() {
 			std::lock_guard<std::mutex> guard(protector);
 			T data = array[1];
 			array[1] = array.back();
 			array.pop_back();
 			down(1);
-			return data;
 		}
 		inline int size() const {
 			return array.size() - 1;
@@ -56,7 +66,7 @@ namespace queue {
 			T data(array[index]);
 			// index indicates the current position
 			while(index != 1) {
-				if (data < array[index / 2])
+				if (compare(data, array[index / 2]))
 					array[index] = array[index / 2];
 				else
 					break;
@@ -69,19 +79,20 @@ namespace queue {
 			// index means the possible dist
 			while (index * 2 < array.size()) {
 				index *= 2;
-				if (index + 1 < array.size() && array[index + 1] < array[index])
+				if (index + 1 < array.size() && compare(array[index + 1], array[index]))
 					index++;
-				if (array[index] < data)
+				if (compare(array[index], data))
 					array[index / 2] = array[index];
 				else
 					break;
 			}
-			if (array[index] >= data)
+			if (!compare(array[index], data))
 				array[index / 2] = data;
 			else
 				array[index] = data;
 		}
-		std::vector<MobileAtomic<T>> array;
+		Con array;
+		Cmp compare;
 		std::mutex protector;
 	};
 }
