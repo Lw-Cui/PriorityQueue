@@ -35,7 +35,7 @@ namespace queue {
 		PriorityQueue(const Cmp& c = Cmp()):array(1), compare(c) {}
 		inline const_iterator begin() const {return ++array.begin();}
 		inline const_iterator end() const {return array.end();}
-		inline void insert(const T& data) {
+		inline void push(const T& data) {
 			std::lock_guard<std::mutex> guard(protector);
 			array.push_back(data);
 			up(array.size() - 1);

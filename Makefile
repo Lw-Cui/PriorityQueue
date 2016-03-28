@@ -7,7 +7,7 @@ GTEST_SRC 	= gsrc/*.cc gsrc/*.h $(GTEST_HEADER)
 test 		: test.o gtest_main.a
 	$(CC) $^ -o $@ $(CXXFLAG)
 
-test.o 		: test.cpp Queue.h
+test.o 		: test.cpp Queue.hpp
 	$(CC) $< -c $(CXXFLAG)
 	
 gtest_main.a: gtest-all.o gtest_main.o

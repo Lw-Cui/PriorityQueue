@@ -1,4 +1,4 @@
-#include "Queue.h"
+#include "Queue.hpp"
 #include "gtest/gtest.h"
 #include <array>
 #include <iostream>
@@ -11,7 +11,7 @@ const int MAX = 100000;
 template<typename T>
 void insert(PriorityQueue<T>& p, const vector<T> set) {
 	for (const auto &d: set)
-		p.insert(d);
+		p.push(d);
 }
 
 TEST(BasicTest, InsertTest) {
