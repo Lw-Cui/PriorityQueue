@@ -5,7 +5,7 @@
 #include <set>
 #include <thread>
 using namespace std;
-using namespace queue;
+using namespace que;
 const int MAX = 100000;
 
 template<typename T>
@@ -65,7 +65,7 @@ TEST(ThreadTest, InsertTest) {
 	vector<int> res;
 	for (const auto &d: queue) res.push_back(d);
 	sort(res.begin(), res.end(), [](auto a, auto b) {return a > b;});
-	for (int i = 0; i < dataset.size(); i++) {
+	for (size_t i = 0; i < dataset.size(); i++) {
 		ASSERT_EQ(dataset[i], res[i * 2]) << "i = " << i << endl;
 		ASSERT_EQ(dataset[i], res[i * 2 + 1]);
 	}
