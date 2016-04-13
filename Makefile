@@ -1,5 +1,5 @@
-CC 			= icc
-CXXFLAG 	= -O0 -Wall -Wextra -g -std=c++14 -pthread -I.
+CC 			= g++-4.9 -std=c++14
+CXXFLAG 	= -O0 -Wall -Wextra -W -ggdb3 -pthread -I.
 
 GTEST_HEADER= gtest/*.h gtest/internal/*.h
 GTEST_SRC 	= gsrc/*.cc gsrc/*.h $(GTEST_HEADER)
