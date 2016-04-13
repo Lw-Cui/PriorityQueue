@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
-namespace queue {
+namespace que {
 	template<typename T>
 	class MobileAtomic
 	{
@@ -28,7 +28,7 @@ namespace queue {
 
 	template<typename T, 
 		typename Con = std::vector<MobileAtomic<T>>,
-		typename Cmp = std::less<typename Con::value_type>>
+		typename Cmp = std::greater<typename Con::value_type>>
 	class PriorityQueue {
 	public:
 		typedef typename Con::const_iterator const_iterator;
@@ -50,7 +50,6 @@ namespace queue {
 
 		inline void pop() {
 			std::lock_guard<std::mutex> guard(protector);
-			T data = array[1];
 			array[1] = array.back();
 			array.pop_back();
 			down(1);
