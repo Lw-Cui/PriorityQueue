@@ -19,9 +19,7 @@ namespace que {
 			atom.store(mobile.atom.load());
 			return *this;
 		}
-		inline operator T() const {
-			return atom.load();
-		}
+		inline operator T() const {return atom.load();}
 	private:
 		std::atomic<T> atom;
 	};
@@ -40,60 +38,23 @@ namespace que {
 			array.push_back(data);
 			up(array.size() - 1);
 		}
-		inline T top() {
-			return array[1];
-		}
-
-		inline int size() {
-			return array.size() - 1;
-		}
-
+		inline T top() {return array[1];}
+		inline int size() {return array.size() - 1;}
 		inline void pop() {
 			std::lock_guard<std::mutex> guard(protector);
 			array[1] = array.back();
 			array.pop_back();
 			down(1);
 		}
-		inline int size() const {
-			return array.size() - 1;
-		}
-		inline bool empty() {
-			return array.size() <= 1;
-		}
+		inline int size() const {return array.size() - 1;}
+		inline bool empty() {return array.size() <= 1;}
 	private:
-		void up(size_t index) {
-			T data(array[index]);
-			// index indicates the current position
-			while(index != 1) {
-				if (compare(data, array[index / 2]))
-					array[index] = array[index / 2];
-				else
-					break;
-				index /= 2;
-			}
-			array[index] = data;
-		}
-		void down(size_t index) {
-			T data(array[index]);
-			// index means the possible dist
-			while (index * 2 < array.size()) {
-				index *= 2;
-				if (index + 1 < array.size() && compare(array[index + 1], array[index]))
-					index++;
-				if (compare(array[index], data))
-					array[index / 2] = array[index];
-				else
-					break;
-			}
-			if (!compare(array[index], data))
-				array[index / 2] = data;
-			else
-				array[index] = data;
-		}
+		void up(size_t index);
+		void down(size_t index);
 		Con array;
 		Cmp compare;
 		std::mutex protector;
 	};
 }
-
+#include "Queue.impl.hpp"
 #endif
