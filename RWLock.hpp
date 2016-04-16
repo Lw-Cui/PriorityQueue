@@ -8,12 +8,12 @@ namespace rbl {
 	public:
 		RBLock():writer{false}, reader{false}{}
 		void readLock() {
-			std::lock_guard<Mutex> guard(mut);
+			std::unique_lock<Mutex> guard(mut);
 			readProcess.wait(guard, [&]{return !writer && !pendingWriter;});
 			reader++;
 		}
 		void writeLock() {
-			std::lock_guard<Mutex> guard(mut);
+			std::unique_lock<Mutex> guard(mut);
 			pendingWriter++;
 			writeProcess.wait(guard, [&]{return !writer && !reader;});
 			writer = true; pendingWriter--;
@@ -35,6 +35,24 @@ namespace rbl {
 		int reader; //the number of reader processing
 		Mutex mut;
 		std::condition_variable writeProcess, readProcess;
+	};
+
+	template<typename RBL>
+	class read_guard {
+	public:
+		read_guard(RBL &l):lk{l}{lk.readLock();}
+		~read_guard(){lk.unlock();}
+	private:
+		RBL &lk;
+	};
+
+	template<typename RBL>
+	class write_guard {
+	public:
+		write_guard(RBL &l):lk{l}{lk.writeLock();}
+		~write_guard(){lk.unlock();}
+	private:
+		RBL &lk;
 	};
 }
 #endif
