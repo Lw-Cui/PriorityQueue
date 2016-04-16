@@ -1,5 +1,6 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
+#include "RWLock.hpp"
 #include <atomic>
 #include <functional>
 #include <mutex>
@@ -10,7 +11,6 @@ namespace que {
 	template<typename T>
 	class MobileAtomic
 	{
-		//template<typename T, std::vector<MobileAtomic<T>>> friend class PriorityQueue;
 	public:
 		MobileAtomic(){}
 		MobileAtomic(const T& data): atom(data) {}
@@ -33,27 +33,38 @@ namespace que {
 		PriorityQueue(const Cmp& c = Cmp()):array(1), compare(c) {}
 		inline const_iterator begin() const {return ++array.begin();}
 		inline const_iterator end() const {return array.end();}
+
+		inline T top() {
+			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
+			return array[1];
+		}
+		inline int size() {
+			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
+			return array.size() - 1;
+		}
+		inline bool empty() {
+			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
+			return size() == 0;
+		}
+
 		inline void push(const T& data) {
-			std::lock_guard<std::mutex> guard(protector);
+			rbl::write_guard<rbl::RBLock<std::mutex>> guard(protector);
 			array.push_back(data);
 			up(array.size() - 1);
 		}
-		inline T top() {return array[1];}
-		inline int size() {return array.size() - 1;}
+
 		inline void pop() {
-			std::lock_guard<std::mutex> guard(protector);
+			rbl::write_guard<rbl::RBLock<std::mutex>> guard(protector);
 			array[1] = array.back();
 			array.pop_back();
 			down(1);
 		}
-		inline int size() const {return array.size() - 1;}
-		inline bool empty() {return array.size() <= 1;}
 	private:
 		void up(size_t index);
 		void down(size_t index);
 		Con array;
 		Cmp compare;
-		std::mutex protector;
+		rbl::RBLock<std::mutex> protector;
 	};
 }
 #include "Queue.impl.hpp"
