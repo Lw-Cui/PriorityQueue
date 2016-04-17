@@ -1,14 +1,16 @@
 #ifndef RB_LOCK_H
 #define RB_LOCK_H
 #include <mutex>
+#include <atomic>
 #include <condition_variable>
 namespace rbl {
 	template <typename Mutex>
 	class RBLock {
 	public:
-		RBLock():writer{false}, reader{false}{}
+		RBLock():writer{false}, pendingWriter{0}, reader{0}{}
 		void readLock() {
 			std::unique_lock<Mutex> guard(mut);
+			// The priority of writer is higher than reader
 			readProcess.wait(guard, [&]{return !writer && !pendingWriter;});
 			reader++;
 		}
@@ -30,9 +32,9 @@ namespace rbl {
 				readProcess.notify_all();
 		}
 	private:
-		bool writer;
-		int pendingWriter;
-		int reader; //the number of reader processing
+		std::atomic<bool> writer;
+		std::atomic<int> pendingWriter;
+		std::atomic<int> reader; //the number of reader processing
 		Mutex mut;
 		std::condition_variable writeProcess, readProcess;
 	};
