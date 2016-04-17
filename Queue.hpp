@@ -28,42 +28,29 @@ namespace que {
 		typename Con = std::vector<MobileAtomic<T>>,
 		typename Cmp = std::greater<typename Con::value_type>>
 	class PriorityQueue {
+	private:
+		typedef typename rbl::read_guard<rbl::RBLock<std::mutex>> read_lock;
+		typedef typename rbl::write_guard<rbl::RBLock<std::mutex>> write_lock;
+		const int BEG = 1;
 	public:
-		typedef typename Con::const_iterator const_iterator;
 		PriorityQueue(const Cmp& c = Cmp()):array(1), compare(c) {}
-		inline const_iterator begin() const {return ++array.begin();}
-		inline const_iterator end() const {return array.end();}
-
-		inline T top() {
-			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
-			return array[1];
-		}
-		inline int size() {
-			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
-			return array.size() - 1;
-		}
-		inline bool empty() {
-			rbl::read_guard<rbl::RBLock<std::mutex>> guard(protector);
-			return size() == 0;
-		}
-
-		inline void push(const T& data) {
-			rbl::write_guard<rbl::RBLock<std::mutex>> guard(protector);
+		T top() {read_lock guard(protector); return array[BEG]; }
+		int size() {read_lock guard(protector); return array.size() - BEG; }
+		bool empty() {read_lock guard(protector); return !size(); }
+		void push(const T& data) {
+			write_lock guard(protector);
 			array.push_back(data);
-			up(array.size() - 1);
+			up(array.size() - BEG);
 		}
-
-		inline void pop() {
-			rbl::write_guard<rbl::RBLock<std::mutex>> guard(protector);
+		void pop() {
+			write_lock guard(protector);
 			array[1] = array.back();
-			array.pop_back();
-			down(1);
+			array.pop_back(); down(BEG);
 		}
 	private:
 		void up(size_t index);
 		void down(size_t index);
-		Con array;
-		Cmp compare;
+		Con array; Cmp compare;
 		rbl::RBLock<std::mutex> protector;
 	};
 }
