@@ -5,8 +5,8 @@
 #include <thread>
 #include <random>
 namespace {
-	const int MAX = 100000;
-	const int REPEATE = 1000;
+	const int MAX = 1000000;
+	const int REPEATE = 10000;
 	class thread_guard {
 	public:
 		explicit thread_guard(std::thread &t):mythread{t}{}
