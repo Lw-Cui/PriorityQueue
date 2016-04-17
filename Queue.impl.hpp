@@ -7,14 +7,14 @@ namespace que {
 		// index means the possible dist
 		while (index * 2 < array.size()) {
 			index *= 2;
-			if (index + 1 < array.size() && compare(array[index + 1], array[index]))
+			if (index + 1 < array.size() && !compare(array[index + 1], array[index]))
 				index++;
-			if (compare(array[index], data))
+			if (!compare(array[index], data))
 				array[index / 2] = array[index];
 			else
 				break;
 		}
-		if (!compare(array[index], data))
+		if (compare(array[index], data))
 			array[index / 2] = data;
 		else
 			array[index] = data;
@@ -25,7 +25,7 @@ namespace que {
 		T data(array[index]);
 		// index indicates the current position
 		while(index != 1) {
-			if (compare(data, array[index / 2]))
+			if (!compare(data, array[index / 2]))
 				array[index] = array[index / 2];
 			else
 				break;
