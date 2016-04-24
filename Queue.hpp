@@ -35,6 +35,11 @@ namespace que {
 			swap(first.compare, second.compare);
 		}
 		PriorityQueue(const Cmp& c = Cmp()):array{1}, compare{c} {}
+		template <typename InputIt>
+		PriorityQueue(InputIt first, InputIt last, const Cmp& c = Cmp())
+			:PriorityQueue{c} {
+			while (first != last) push(*first++);
+		}
 		~PriorityQueue() {}
 		PriorityQueue(const PriorityQueue &other):array{other.array}, compare{other.compare} {}
 		PriorityQueue(PriorityQueue &&other):PriorityQueue{} {swap(*this, other);}
