@@ -22,10 +22,12 @@ namespace rbl {
 		}
 		void unlock() {
 			std::lock_guard<Mutex> guard(mut);
-			if (writer) writer = false;
-			else if (reader) reader--;
 			// writer = true->false; reader = 0; pendingWriter >= 0;
 			// OR: writer = false; --reader >= 0; pendingWriter >= 0;
+			if (writer) writer = false;
+			else if (reader) reader--;
+			// again, writer is higher than reader
+			// (requests of reader and writer are all coming when writing)
 			if (!reader && pendingWriter)
 				writeProcess.notify_one();
 			else // reader > 0 || pendingWriter == 0
