@@ -1,5 +1,4 @@
-#ifndef _QUEUE_IMPL_H_
-#define _QUEUE_IMPL_H_
+_Pragma ("once");
 namespace que {
 	template<typename T, typename Con, typename Cmp>
 	void PriorityQueue<T, Con, Cmp>::down(size_t index) {
@@ -34,4 +33,3 @@ namespace que {
 		array[index] = data;
 	}
 }
-#endif

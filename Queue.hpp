@@ -1,5 +1,4 @@
-#ifndef _QUEUE_H_
-#define _QUEUE_H_
+_Pragma ("once");
 #include "RWLock.hpp"
 #include <atomic>
 #include <mutex>
@@ -65,4 +64,3 @@ namespace que {
 	};
 }
 #include "Queue.impl.hpp"
-#endif

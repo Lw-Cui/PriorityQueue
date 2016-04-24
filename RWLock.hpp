@@ -1,5 +1,4 @@
-#ifndef RB_LOCK_H
-#define RB_LOCK_H
+_Pragma ("once");
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
@@ -59,4 +58,3 @@ namespace rbl {
 		RBL &lk;
 	};
 }
-#endif
