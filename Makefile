@@ -1,27 +1,16 @@
-CC 			= g++-4.9 -std=c++14
-CXXFLAG 	= -O0 -Wall -Wextra -W -ggdb3 -pthread -I.
+CC	= g++-4.9 -std=c++14
+CXXFLAG = -O0 -Wall -Wextra -W -ggdb3 -pthread -I.
+STATICLIB = gtest-x64.a
 
-GTEST_HEADER= gtest/*.h gtest/internal/*.h
-GTEST_SRC 	= gsrc/*.cc gsrc/*.h $(GTEST_HEADER)
-
-test 		: test.o gtest_main.a
+test: test.o $(STATICLIB)
 	$(CC) $^ -o $@ $(CXXFLAG)
 
-test.o 		: test.cpp Queue.hpp RWLock.hpp Queue.impl.hpp
+test.o: test.cpp Queue.hpp RWLock.hpp Queue.impl.hpp
 	$(CC) $< -c $(CXXFLAG)
 	
-gtest_main.a: gtest-all.o gtest_main.o
-	$(AR) $(ARFLAGS) $@ $^
-
-gtest-all.o : $(GTEST_SRC)
-	$(CC) $(CXXFLAG) -c gsrc/gtest-all.cc
-
-gtest_main.o: $(GTEST_SRC)
-	$(CC) $(CXXFLAG) -c gsrc/gtest_main.cc
-
-clean		:
+clean:
 	rm -f *.o test
 
-rebuild		:	clean test
+rebuild: clean test
 
-.PHONY		:	clean rebuild
+.PHONY:	clean rebuild test
