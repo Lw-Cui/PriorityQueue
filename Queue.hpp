@@ -4,13 +4,14 @@ _Pragma ("once");
 #include <mutex>
 #include <vector>
 namespace que {
-	template<typename T>
+	template <typename T>
 	class MobileAtomic
 	{
 	public:
 		MobileAtomic(){}
-		MobileAtomic(const T& data): atom(data) {}
-		MobileAtomic(const MobileAtomic& mobile): atom(mobile.atom.load()) {}
+		MobileAtomic(const T& data): atom{data} {}
+		// atmoic cannot copy/move. So rvalue argument is invalid.
+		MobileAtomic(const MobileAtomic& mobile): atom{mobile.atom.load()} {}
 		MobileAtomic& operator=(const MobileAtomic &mobile) {
 			atom.store(mobile.atom.load()); return *this;
 		}
@@ -24,14 +25,13 @@ namespace que {
 		typename Cmp = std::less<typename Con::value_type>>
 	class PriorityQueue {
 	private:
-		typedef typename rbl::read_guard<rbl::RBLock<std::mutex>> read_lock;
-		typedef typename rbl::write_guard<rbl::RBLock<std::mutex>> write_lock;
+		using read_lock = rbl::read_guard<rbl::RBLock<std::mutex>>;
+		using write_lock = rbl::write_guard<rbl::RBLock<std::mutex>>;
 		static const int BEG = 1;
 	public:
-		friend void swap(PriorityQueue &first, PriorityQueue &second) {
-			using std::swap;
-			first.array.swap(second.array);
-			swap(first.compare, second.compare);
+		friend void steal(PriorityQueue &first, PriorityQueue &second) {
+			first.array = std::move(second.array);
+			first.compare = std::move(second.compare);
 		}
 		PriorityQueue(const Cmp& c = Cmp()):array{1}, compare{c} {}
 		template <typename InputIt>
@@ -41,8 +41,8 @@ namespace que {
 		}
 		~PriorityQueue() {}
 		PriorityQueue(const PriorityQueue &other):array{other.array}, compare{other.compare} {}
-		PriorityQueue(PriorityQueue &&other):PriorityQueue{} {swap(*this, other);}
-		PriorityQueue& operator=(PriorityQueue other) {swap(*this, other); return *this;}
+		PriorityQueue(PriorityQueue &&other):PriorityQueue{} {steal(*this, other);}
+		PriorityQueue& operator=(PriorityQueue other) {steal(*this, other); return *this;}
 		T top() {read_lock guard(protector); return array[BEG]; }
 		int size() {read_lock guard(protector); return array.size() - BEG; }
 		bool empty() {read_lock guard(protector); return !size(); }
