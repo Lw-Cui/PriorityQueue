@@ -29,9 +29,11 @@ namespace que {
 		using write_lock = rbl::write_guard<rbl::RBLock<std::mutex>>;
 		static const int BEG = 1;
 	public:
-		friend void steal(PriorityQueue &first, PriorityQueue &second) {
-			first.array = std::move(second.array);
-			first.compare = std::move(second.compare);
+		friend void swap(PriorityQueue &first, PriorityQueue &second) {
+			using std::swap;
+			// Hope that array and compare have defined their own move constructor
+			swap(first.array, second.array);
+			swap(first.compare, second.compare);
 		}
 		PriorityQueue(const Cmp& c = Cmp()):array{1}, compare{c} {}
 		template <typename InputIt>
@@ -41,8 +43,8 @@ namespace que {
 		}
 		~PriorityQueue() {}
 		PriorityQueue(const PriorityQueue &other):array{other.array}, compare{other.compare} {}
-		PriorityQueue(PriorityQueue &&other):PriorityQueue{} {steal(*this, other);}
-		PriorityQueue& operator=(PriorityQueue other) {steal(*this, other); return *this;}
+		PriorityQueue(PriorityQueue &&other):PriorityQueue{} {swap(*this, other);}
+		PriorityQueue& operator=(PriorityQueue other) {swap(*this, other); return *this;}
 		T top() {read_lock guard(protector); return array[BEG]; }
 		int size() {read_lock guard(protector); return array.size() - BEG; }
 		bool empty() {read_lock guard(protector); return !size(); }
