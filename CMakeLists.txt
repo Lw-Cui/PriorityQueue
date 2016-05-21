@@ -8,7 +8,7 @@ set(PRIORITYQUEUE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE INTERNA
 include_directories(${PRIORITYQUEUE_INCLUDE_DIRS})
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_subdirectory(gtest)
+add_subdirectory(googletest)
 add_subdirectory(test)
 enable_testing()
 add_test(NAME normal_test COMMAND tests)
