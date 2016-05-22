@@ -1,2 +1,2 @@
-add_executable(tests test.cpp)
-target_link_libraries(tests gtest gtest_main)
+add_executable(PQtests test.cpp)
+target_link_libraries(PQtests gtest gtest_main)
